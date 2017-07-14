@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>207</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>CSEM - LiDAR Viewer</string>
+  </property>
+  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu_File">
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+    <widget class="QMenu" name="menu_Recents">
+     <property name="statusTip">
+      <string>Recently Opened Folder</string>
+     </property>
+     <property name="title">
+      <string>&amp;Recents</string>
+     </property>
+     <addaction name="action_empty"/>
+    </widget>
+    <widget class="QMenu" name="menu_Export">
+     <property name="statusTip">
+      <string>Export the viewed data to a file</string>
+     </property>
+     <property name="title">
+      <string>&amp;Export To...</string>
+     </property>
+     <addaction name="actionSTL"/>
+     <addaction name="action_PLY"/>
+    </widget>
+    <addaction name="action_Open"/>
+    <addaction name="menu_Recents"/>
+    <addaction name="menu_Export"/>
+   </widget>
+   <widget class="QMenu" name="menu_DataReader">
+    <property name="title">
+     <string>&amp;DataReader</string>
+    </property>
+    <addaction name="actionDepthMap"/>
+    <addaction name="actionConvolution"/>
+    <addaction name="actionGaussian_Fit"/>
+    <addaction name="actionFull_Cube"/>
+   </widget>
+   <widget class="QMenu" name="menuColors">
+    <property name="title">
+     <string>C&amp;olors</string>
+    </property>
+    <addaction name="actionIntensity"/>
+    <addaction name="actionVariation"/>
+    <addaction name="actionConfidence"/>
+    <addaction name="actionDepth"/>
+    <addaction name="separator"/>
+    <addaction name="actionDefault_Colors"/>
+    <addaction name="actionBlank"/>
+    <addaction name="actionHot"/>
+    <addaction name="actionJet"/>
+    <addaction name="actionCustom_Color_Scheme"/>
+    <addaction name="separator"/>
+    <addaction name="actionBackground_Color"/>
+   </widget>
+   <widget class="QMenu" name="menuVisualisation">
+    <property name="title">
+     <string>&amp;Visualisation</string>
+    </property>
+    <addaction name="actionBox"/>
+    <addaction name="actionAxes"/>
+    <addaction name="actionDepth_Indicator"/>
+    <addaction name="actionColorScale"/>
+    <addaction name="separator"/>
+    <addaction name="actionRestore_Points"/>
+   </widget>
+   <widget class="QMenu" name="menuCamera">
+    <property name="title">
+     <string>&amp;Camera</string>
+    </property>
+    <addaction name="actionFront_View"/>
+    <addaction name="actionSide_View"/>
+    <addaction name="actionTop_VIew"/>
+    <addaction name="actionIsometric_View"/>
+   </widget>
+   <addaction name="menu_File"/>
+   <addaction name="menu_DataReader"/>
+   <addaction name="menuColors"/>
+   <addaction name="menuVisualisation"/>
+   <addaction name="menuCamera"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="action_Open">
+   <property name="text">
+    <string>&amp;Open</string>
+   </property>
+   <property name="statusTip">
+    <string>Open Folder containing the Numpy archives</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="action_empty">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>(empty)</string>
+   </property>
+  </action>
+  <action name="actionDepthMap">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>DepthMap</string>
+   </property>
+   <property name="statusTip">
+    <string/>
+   </property>
+  </action>
+  <action name="actionConvolution">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Convolution</string>
+   </property>
+  </action>
+  <action name="actionGaussian_Fit">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Gaussian Fit</string>
+   </property>
+  </action>
+  <action name="actionFull_Cube">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Full Cube</string>
+   </property>
+  </action>
+  <action name="actionIntensity">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Intensity</string>
+   </property>
+   <property name="statusTip">
+    <string>Color of a point will be determined by the number of photons received</string>
+   </property>
+  </action>
+  <action name="actionVariation">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Variation</string>
+   </property>
+  </action>
+  <action name="actionConfidence">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Confidence</string>
+   </property>
+  </action>
+  <action name="actionDepth">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Depth</string>
+   </property>
+   <property name="statusTip">
+    <string>Color of a point will be determined by its position along the Z axis</string>
+   </property>
+  </action>
+  <action name="actionJet">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Jet</string>
+   </property>
+  </action>
+  <action name="actionHot">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Hot</string>
+   </property>
+  </action>
+  <action name="actionCustom_Color_Scheme">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Custom...</string>
+   </property>
+  </action>
+  <action name="actionBlank">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>White</string>
+   </property>
+  </action>
+  <action name="actionBox">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Outlining Cube</string>
+   </property>
+   <property name="statusTip">
+    <string>Show / hide the outlining box around the data</string>
+   </property>
+  </action>
+  <action name="actionAxes">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Axes</string>
+   </property>
+   <property name="statusTip">
+    <string>Show / hide the rotating axes in the corner</string>
+   </property>
+  </action>
+  <action name="actionDepth_Indicator">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Depth Indicator</string>
+   </property>
+   <property name="statusTip">
+    <string>Show / hide the indication of depth along the Z axis</string>
+   </property>
+  </action>
+  <action name="actionFront_View">
+   <property name="text">
+    <string>Front View</string>
+   </property>
+   <property name="statusTip">
+    <string>Set the camera facing the data from the front</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
+   </property>
+  </action>
+  <action name="actionSide_View">
+   <property name="text">
+    <string>Side View</string>
+   </property>
+   <property name="statusTip">
+    <string>Set the camera facing the data from the right side</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
+   </property>
+  </action>
+  <action name="actionTop_VIew">
+   <property name="text">
+    <string>Top VIew</string>
+   </property>
+   <property name="statusTip">
+    <string>Set the camera facing the data from the top</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Y</string>
+   </property>
+  </action>
+  <action name="actionDefault_Colors">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Default</string>
+   </property>
+   <property name="statusTip">
+    <string>Change the color of the background</string>
+   </property>
+  </action>
+  <action name="actionSTL">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>.STL</string>
+   </property>
+   <property name="statusTip">
+    <string>Export to the .STL format</string>
+   </property>
+  </action>
+  <action name="action_PLY">
+   <property name="text">
+    <string>.PLY</string>
+   </property>
+   <property name="statusTip">
+    <string>Export to the .PLY format</string>
+   </property>
+  </action>
+  <action name="actionColorScale">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>ColorScale</string>
+   </property>
+  </action>
+  <action name="actionRestore_Points">
+   <property name="text">
+    <string>Restore Points</string>
+   </property>
+   <property name="statusTip">
+    <string>Restore Points that were deleted with selection</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionIsometric_View">
+   <property name="text">
+    <string>Isometric View</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
+   </property>
+  </action>
+  <action name="actionBackground_Color">
+   <property name="text">
+    <string>Background Color</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
