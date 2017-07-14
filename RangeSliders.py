@@ -140,15 +140,12 @@ class MeshOptionsWidget(QWidget):
         self.relaxationFactor.valueChanged.connect(self.relaxationChanged)
         
     def emitAlphaChanged(self, s):
-        print("[MeshOptionsWidget] emitting alphaChanged :", s)
         self.alphaChanged.emit(s)
         
     def iterationNumberChanged(self, s):
-        print("[MeshOptionsWidget] emitting smoothOptionsChanged :", s, self.relaxationFactor.value())
         self.smoothOptionsChanged.emit(s, self.relaxationFactor.value())
     
     def relaxationChanged(self, s):
-        print("[MeshOptionsWidget] emitting alphaChanged :", self.iterationNumber.value(), s)
         self.smoothOptionsChanged.emit(self.iterationNumber.value(), s)
 
    
@@ -180,11 +177,9 @@ class OutlierFilterWidget(QWidget):
         self.spinBoxRadius.valueChanged.connect(self.radiusChanged)
         
     def neighborsChanged(self, s):
-        print("[OutlierFilterWidget] emitting : ", s, self.spinBoxRadius.value())
         self.optionsChanged.emit(s, self.spinBoxRadius.value())
         
     def radiusChanged(self, s):
-        print("[OutlierFilterWidget] emitting : ", self.neighborCount.value(), s)
         self.optionsChanged.emit(self.neighborCount.value(), s)
 
 

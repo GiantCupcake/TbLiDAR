@@ -212,7 +212,6 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
         pass
     
     def setZBounds(self, z1, z2):
-        print("[PointCloudsVisualisator] setZBounds ", z1, z2)
         bounds = self.listPassThrough[0].GetOutput().GetBounds()
         boundingBox = vtk.vtkBox()
         boundingBox.SetBounds(bounds[0], bounds[1], bounds[2], bounds[3], float(z1), float(z2))
@@ -233,14 +232,12 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
 
         
     def setMeshAlpha(self, alpha):
-        print("[PCV] setMeshAlpha", alpha)
         self.meshFilter.SetAlpha(alpha)
         self.meshFilter.Modified()
         self.repaint()
 
         
     def setSmoothingOptions(self, iterations, relaxation):
-        print("[PCV] setSmoothingOptions", iterations, relaxation)
 
         self.smoothFilter.SetNumberOfIterations(iterations)
         self.smoothFilter.SetRelaxationFactor(relaxation)
@@ -336,7 +333,6 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
         
     def addBannedIds(self, ids):
         for i in range(ids.GetNumberOfTuples()):
-            #print(ids.GetValue(i))
             self.bannedIds.InsertNextValue(ids.GetValue(i))
         self.selectionNode.SetSelectionList(self.bannedIds)
         self.selectionNode.Modified()

@@ -26,9 +26,7 @@ class MainWindow(QtWidgets.QMainWindow, UI_MainWindow.Ui_MainWindow):
         self.activateCheckedActions()
 
         
-    def closeEvent(self, event):
-        print("CloseEvent called saving settings")
-        
+    def closeEvent(self, event):        
         self.settings.setValue("geometry", self.saveGeometry())
         self.settings.setValue("windowState", self.saveState())
         super().closeEvent(event)
@@ -39,12 +37,10 @@ class MainWindow(QtWidgets.QMainWindow, UI_MainWindow.Ui_MainWindow):
         self.restoreState(self.settings.value("windowState", type = QtCore.QByteArray))
         
     def activateCheckedActions(self):
-        print("[MainWindow] activateCheckedAction")
         self.actionGroupDataReader.checkedAction().trigger()
         self.actionGroupColorsFrom.checkedAction().trigger()
         self.actionGroupColorsScheme.checkedAction().trigger()
         
-        print("is it checked ? ",self.actionBox.isChecked())
         if self.actionBox.isChecked():    
             self.actionBox.trigger()
             self.actionBox.trigger()

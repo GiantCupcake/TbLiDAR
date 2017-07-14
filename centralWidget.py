@@ -43,7 +43,7 @@ class CentralWidget(QWidget):
         self.pcv = None
         self.controlsWidget = None
 
-        self.currentFolder = os.path.join(os.getcwd(), 'Donnees_brutes/tractopelle')
+        self.currentFolder = os.path.join(os.getcwd(), '../Donnees_brutes/tractopelle')
         self.initWidgets()
         self.hl = QHBoxLayout()
         self.hl.addWidget(self.pcv)
@@ -118,7 +118,6 @@ class CentralWidget(QWidget):
     @display_time
     def openDirectory(self, s):
         #TODO: Rewrite properly
-        print("[CentralWidget] openDirectory")
         fd = QFileDialog()
         fd.setFileMode(QFileDialog.Directory)
         if fd.exec():
@@ -130,7 +129,6 @@ class CentralWidget(QWidget):
     @waiting_effects           
     def fullCubeMode(self, s):
         #TODO: Rewrite properly
-        print("[CentralWidget] fullCubeMode")
         interpreter = LidarDataInterpreter(self.currentFolder)
         self.pcv.updatePoints(interpreter.getFullCube())
         
@@ -138,7 +136,6 @@ class CentralWidget(QWidget):
     @display_time
     def depthMapMode(self, s):
         #TODO: Rewrite properly
-        print("[CentralWidget] depthMapMode")
         interpreter = LidarDataInterpreter(self.currentFolder)
         self.pcv.updatePoints(interpreter.getPointsFromDepthMap())
         
@@ -150,7 +147,6 @@ class CentralWidget(QWidget):
         fd.setNameFilter("STL format file (*.stl)");
         if fd.exec():
             fileNames = fd.selectedFiles()
-            print("Saving to {0}".format(fileNames[0]))
             self.pcv.writeSTL(fileNames[0])
     
     def writePLY(self, s):
@@ -159,7 +155,6 @@ class CentralWidget(QWidget):
         fd.setNameFilter("PLY format file (*.ply)");
         if fd.exec():
             fileNames = fd.selectedFiles()
-            print("Saving to {0}".format(fileNames[0]))
             self.pcv.writePLY(fileNames[0])
         
     def customColoriser(self, s):
@@ -170,19 +165,16 @@ class CentralWidget(QWidget):
         self.pcv.defaultColoriser()
         
     def colorSchemeHot(self, s):
-        print("[CentralWidget] colorSchemeHot")
         colormap = cm.ScalarMappable(colors.Normalize(0, 20), 'hot')
         points = colormap.to_rgba(range(20))
         self.pcv.customColoriser(points)
         
     def colorSchemeJet(self, s):
-        print("[CentralWidget] colorSchemeJet")
         colormap = cm.ScalarMappable(colors.Normalize(0, 20), 'jet')
         points = colormap.to_rgba(range(20))
         self.pcv.customColoriser(points)
         
     def colorSchemeWhite(self, s):
-        print("[CentralWidget] colorSchemeWhite")
         self.pcv.customAlphaColoriser()
         #self.pcv.customColoriser(((1.,1.,1.,0.),(1.,1.,1.,1.)))
         
@@ -201,12 +193,10 @@ class CentralWidget(QWidget):
         cd.setOption(QColorDialog.ShowAlphaChannel, False)
         if cd.exec():
             qColor = cd.selectedColor()
-            print((qColor.redF(), qColor.greenF(), qColor.blueF()))
             self.pcv.setBackgroundColor((qColor.redF(), qColor.greenF(), qColor.blueF()))
     
     
     def showOutliningCube(self, s):
-        print(s)
         if s == True:
             self.pcv.showOutliningCube()
         if s == False:
@@ -214,7 +204,6 @@ class CentralWidget(QWidget):
             
     
     def showAxes(self, s):
-        print(s)
         if s == True:
             self.pcv.showAxes()
         if s == False:
@@ -222,21 +211,18 @@ class CentralWidget(QWidget):
 
     
     def showDepthIndicator(self, s):
-        print(s)
         if s == True:
             self.pcv.showDepthIndicator()
         if s == False:
             self.pcv.hideDepthIndicator()
             
     def showLookupTable(self, s):
-        print(s)
         if s == True:
             self.pcv.showLookupTable()
         if s == False:
             self.pcv.hideLookupTable()
         
     def restoreDeletedPoints(self, s):
-        print("[CentralWidget] restoreDeletedPoints")
         self.pcv.clearBannedIds()
     
     def displayFrontView(self, s):

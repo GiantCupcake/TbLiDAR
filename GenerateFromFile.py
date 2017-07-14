@@ -26,7 +26,7 @@ class LidarDataInterpreter:
     def __init__(self, _folder):
         self.data = np.load(os.path.join(os.getcwd(), _folder, 'depthMap.npz'))
         self.oneImage = np.load(os.path.join(os.getcwd(), _folder, 'image000.npz'))
-        self.correction = np.load('Donnees_brutes/ref1.npz')['correction']
+        self.correction = np.load('../Donnees_brutes/ref1.npz')['correction']
         #On veut les indices dans l'histogramme correspondant aux distances min / max
         self.distanceAxis = self.oneImage['distanceAxis']
         #self.dMin = int((np.abs(distanceAxis - _dmin)).argmin())
@@ -67,8 +67,6 @@ class LidarDataInterpreter:
     
     def getFullCube(self):
         dataCube = self.data['dataCubeAVG']
-        print(dataCube.shape)
-        print(self.distanceAxis[0])
         size = dataCube.shape[0]
         alpha = 2.9 * np.pi / 180
         
@@ -97,8 +95,6 @@ class LidarDataInterpreter:
 
     def getHalfFullCube(self):
         dataCube = self.data['dataCubeAVG']
-        print(dataCube.shape)
-        print(self.distanceAxis[0])
         size = dataCube.shape[0]
         alpha = 2.9 * np.pi / 180
         
