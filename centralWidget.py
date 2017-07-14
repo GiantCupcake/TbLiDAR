@@ -37,15 +37,16 @@ def waiting_effects(func):
 
 class CentralWidget(QWidget):
     
-    def __init__(self, mainWindow):
+    def __init__(self, mainWindow, folderPath):
         super().__init__()
         self.parent = mainWindow
         self.pcv = None
         self.controlsWidget = None
-
-        self.currentFolder = os.path.join(os.getcwd(), '../Donnees_brutes/tractopelle')
-        self.initWidgets()
         self.hl = QHBoxLayout()
+        
+
+        self.currentFolder = folderPath
+        self.initWidgets()
         self.hl.addWidget(self.pcv)
         self.setLayout(self.hl)
     

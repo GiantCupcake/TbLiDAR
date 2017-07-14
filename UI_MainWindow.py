@@ -11,7 +11,6 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     
     def setupSlots(self, mainWidget):
-        self.action_Open.triggered.connect(mainWidget.openDirectory)
         #self.action_empty.triggered.connect()
         self.actionDepthMap.triggered.connect(mainWidget.depthMapMode)
         #self.actionConvolution.triggered.connect()
@@ -227,6 +226,7 @@ class Ui_MainWindow(object):
         
         QtWidgets.QDockWidget.closeEvent = dockHide
         MainWindow.destroyed.connect(self.dockWidget.destroy)
+        self.action_Open.triggered.connect(MainWindow.openDirectory)
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)

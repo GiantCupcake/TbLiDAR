@@ -6,6 +6,7 @@ Created on Fri Jun 23 15:15:29 2017
 """
 
 from PyQt5 import QtWidgets, QtCore
+from PyQt5.QtWidgets import QFileDialog
 
 import UI_MainWindow
 from centralWidget import CentralWidget
@@ -17,10 +18,7 @@ class MainWindow(QtWidgets.QMainWindow, UI_MainWindow.Ui_MainWindow):
         super().__init__()
         self.settings = QtCore.QSettings("CSEM", "LiDARViewer")
         self.setupUi(self)
-        self.centralWidget = CentralWidget(self)
-        self.setupSlots(self.centralWidget)
-        self.setCentralWidget(self.centralWidget)
-        self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.dockWidget)
+        self.centralWidget = None
 
         self.readSettings()
         self.activateCheckedActions()
@@ -54,7 +52,16 @@ class MainWindow(QtWidgets.QMainWindow, UI_MainWindow.Ui_MainWindow):
             self.actionColorScale.trigger()
             self.actionColorScale.trigger()
 
-        
+
+    def openDirectory(self, s):
+        #TODO: Rewrite properly
+        fd = QFileDialog()
+        fd.setFileMode(QFileDialog.Directory)
+        if fd.exec():
+            self.centralWidget = CentralWidget(self, fd.selectedFiles()[0])
+            self.setupSlots(self.centralWidget)
+            self.setCentralWidget(self.centralWidget)
+            self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.dockWidget)
         
 if __name__ == "__main__":
     import sys

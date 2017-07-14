@@ -26,7 +26,6 @@ class LidarDataInterpreter:
     def __init__(self, _folder):
         self.data = np.load(os.path.join(os.getcwd(), _folder, 'depthMap.npz'))
         self.oneImage = np.load(os.path.join(os.getcwd(), _folder, 'image000.npz'))
-        self.correction = np.load('../Donnees_brutes/ref1.npz')['correction']
         #On veut les indices dans l'histogramme correspondant aux distances min / max
         self.distanceAxis = self.oneImage['distanceAxis']
         #self.dMin = int((np.abs(distanceAxis - _dmin)).argmin())
@@ -155,38 +154,6 @@ class InterestPoint:
     def var(self, val):
         self.__var = val
     
-
-class OLD__DataInterpreter:
-    def __init__(self, _folder, _dmin = 0, _dmax = float('inf')):
-        self.data = np.load(os.path.join(os.getcwd(), _folder, 'depthMap.npz'))
-        self.oneImage = np.load(os.path.join(os.getcwd(), _folder, 'image000.npz'))
-        self.correction = np.load('Donnees_brutes/ref1.npz')['correction']
-        #On veut les indices dans l'histogramme correspondant aux distances min / max
-        distanceAxis = self.oneImage['distanceAxis']
-        self.dMin = int((np.abs(distanceAxis - _dmin)).argmin())
-        self.dMax = int((np.abs(distanceAxis - _dmax)).argmin())
-    
-    
-    def getColorsFromIntensity(self):
-        sumCountsAVG = np.sum(self.data['dataCubeAVG'][:,:,self.dMin:self.dMax],axis=2)
-        sumCountsAVG[64:68,:] = np.ones([4,132])*np.nan
-        sumCountsAVG[:,64:68] = np.ones([132,4])*np.nan
-        
-        size = sumCountsAVG.shape[0]
-        #Color scheme
-        #vmin = sumCountsAVG[~np.isnan(sumCountsAVG)].min()
-        #vmax = sumCountsAVG[~np.isnan(sumCountsAVG)].max()
-        vmin = np.nanmin(sumCountsAVG)
-        vmax = np.nanmax(sumCountsAVG)
-        colormap = cm.ScalarMappable(colors.Normalize(vmin,vmax), 'hot')
-        def colorGenerator():
-            for ix in range(size):
-                for iy in range(size):
-                    count = sumCountsAVG[ix,iy]
-                    if np.isnan(count):
-                        continue
-                    yield colormap.to_rgba(count, bytes = True)
-        return colorGenerator()
 
 
 if __name__ == "__main__":
