@@ -48,11 +48,14 @@ class ControlsWidget(QTabWidget):
         #First page : filters
         vlFilters = QVBoxLayout()
         self.distanceFilter = ActivableWidget(QLabel("Reduce Visible Depth"), RangeSliders(0.0, 1.0))
-        self.confidenceFilter = ActivableWidget(QLabel("Filter By Confidence [%]"), LabeledSlider())
+        self.confidenceFilter = ActivableWidget(QLabel("Filter By Intensity [x : 1.0]"), LabeledSlider())
+        self.sigmaFilter = ActivableWidget(QLabel("Filter By Sigma [0 : x]"), LabeledSlider())
+        self.sigmaFilter.widget.slider.setValue(100)
         
         self.outlierFilter =  ActivableWidget(QLabel("Filter Outliers"), OutlierFilterWidget())
         vlFilters.addWidget(self.distanceFilter)
         vlFilters.addWidget(self.confidenceFilter)
+        vlFilters.addWidget(self.sigmaFilter)
         vlFilters.addWidget(self.outlierFilter)
         vlFilters.addStretch()
         
@@ -140,12 +143,15 @@ class MeshOptionsWidget(QWidget):
         self.relaxationFactor.valueChanged.connect(self.relaxationChanged)
         
     def emitAlphaChanged(self, s):
+        print("[MeshOptionsWidget] emitting alphaChanged :", s)
         self.alphaChanged.emit(s)
         
     def iterationNumberChanged(self, s):
+        print("[MeshOptionsWidget] emitting smoothOptionsChanged :", s, self.relaxationFactor.value())
         self.smoothOptionsChanged.emit(s, self.relaxationFactor.value())
     
     def relaxationChanged(self, s):
+        print("[MeshOptionsWidget] emitting alphaChanged :", self.iterationNumber.value(), s)
         self.smoothOptionsChanged.emit(self.iterationNumber.value(), s)
 
    
@@ -177,9 +183,11 @@ class OutlierFilterWidget(QWidget):
         self.spinBoxRadius.valueChanged.connect(self.radiusChanged)
         
     def neighborsChanged(self, s):
+        print("[OutlierFilterWidget] emitting : ", s, self.spinBoxRadius.value())
         self.optionsChanged.emit(s, self.spinBoxRadius.value())
         
     def radiusChanged(self, s):
+        print("[OutlierFilterWidget] emitting : ", self.neighborCount.value(), s)
         self.optionsChanged.emit(self.neighborCount.value(), s)
 
 

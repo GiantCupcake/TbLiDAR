@@ -16,9 +16,8 @@ class Ui_MainWindow(object):
         #self.actionConvolution.triggered.connect()
         #self.actionGaussian_Fit.triggered.connect()
         self.actionFull_Cube.triggered.connect(mainWidget.fullCubeMode)
-        #self.actionIntensity.triggered.connect(mainWidget.)
         self.actionVariation.triggered.connect(mainWidget.variationColoriser)
-        self.actionConfidence.triggered.connect(mainWidget.confidenceColoriser)
+        self.actionIntensity.triggered.connect(mainWidget.intensityColoriser)
         self.actionDepth.triggered.connect(mainWidget.depthColoriser)
         self.actionDefaultColor.triggered.connect(mainWidget.colorSchemeDefaultVTK)
         self.actionJet.triggered.connect(mainWidget.colorSchemeJet)
@@ -31,14 +30,18 @@ class Ui_MainWindow(object):
         self.actionColorScale.triggered.connect(mainWidget.showLookupTable)
         self.actionRestore_Points.triggered.connect(mainWidget.restoreDeletedPoints)
         
-        
         self.actionFront_View.triggered.connect(mainWidget.displayFrontView)        
         self.actionSide_View.triggered.connect(mainWidget.displaySideView)        
         self.actionTop_VIew.triggered.connect(mainWidget.displayTopView)   
         self.actionIsometric_View.triggered.connect(mainWidget.displayIsometricView)
+        self.actionHistogram_Viewer.triggered.connect(mainWidget.histogramViewer)
         self.actionBackground_Color.triggered.connect(mainWidget.setBackgroundColor)       
         self.actionSTL.triggered.connect(mainWidget.writeSTL)
         self.action_PLY.triggered.connect(mainWidget.writePLY)
+        
+        self.actionTable_From_Filtered_Points.triggered.connect(mainWidget.buildCMFromFilteredPoints)
+        self.actionTable_From_All_Points.triggered.connect(mainWidget.buildCMFromAllPoints)
+
         
     
     def setupUi(self, MainWindow):
@@ -100,19 +103,15 @@ class Ui_MainWindow(object):
         self.actionIntensity.setObjectName("actionIntensity")
         self.actionVariation = QtWidgets.QAction(MainWindow)
         self.actionVariation.setCheckable(True)
-        self.actionVariation.setEnabled(False)
+        self.actionVariation.setChecked(False)
         self.actionVariation.setObjectName("actionVariation")
-        self.actionConfidence = QtWidgets.QAction(MainWindow)
-        self.actionConfidence.setCheckable(True)
-        self.actionConfidence.setEnabled(False)
-        self.actionConfidence.setObjectName("actionConfidence")
         self.actionDepth = QtWidgets.QAction(MainWindow)
         self.actionDepth.setCheckable(True)
+        self.actionDepth.setChecked(False)
         self.actionDepth.setObjectName("actionDepth")
         self.actionGroupColorsFrom = QtWidgets.QActionGroup(MainWindow)
         self.actionGroupColorsFrom.addAction(self.actionIntensity)
         self.actionGroupColorsFrom.addAction(self.actionVariation)
-        self.actionGroupColorsFrom.addAction(self.actionConfidence)
         self.actionGroupColorsFrom.addAction(self.actionDepth)
         
         self.actionJet = QtWidgets.QAction(MainWindow)
@@ -171,10 +170,17 @@ class Ui_MainWindow(object):
         
         self.actionBackground_Color = QtWidgets.QAction(MainWindow)
         self.actionBackground_Color.setObjectName("actionBackground_Color")
+        self.actionTable_From_Filtered_Points = QtWidgets.QAction(MainWindow)
+        self.actionTable_From_Filtered_Points.setObjectName("actionTable_From_Filtered_Points")
+        self.actionTable_From_All_Points = QtWidgets.QAction(MainWindow)
+        self.actionTable_From_All_Points.setObjectName("actionTable_From_All_Points")
         self.actionSTL = QtWidgets.QAction(MainWindow)
         self.actionSTL.setObjectName("actionSTL")
         self.action_PLY = QtWidgets.QAction(MainWindow)
         self.action_PLY.setObjectName("action_PLY")
+        self.actionHistogram_Viewer = QtWidgets.QAction(MainWindow)
+        self.actionHistogram_Viewer.setObjectName("actionHistogram_Viewer")
+        
         self.menu_Recents.addAction(self.action_empty)
         self.menu_Export.addAction(self.actionSTL)
         self.menu_Export.addAction(self.action_PLY)
@@ -185,9 +191,8 @@ class Ui_MainWindow(object):
         self.menu_DataReader.addAction(self.actionConvolution)
         self.menu_DataReader.addAction(self.actionGaussian_Fit)
         self.menu_DataReader.addAction(self.actionFull_Cube)
-        self.menuColors.addAction(self.actionIntensity)
         self.menuColors.addAction(self.actionVariation)
-        self.menuColors.addAction(self.actionConfidence)
+        self.menuColors.addAction(self.actionIntensity)
         self.menuColors.addAction(self.actionDepth)
         self.menuColors.addSeparator()
         self.menuColors.addAction(self.actionDefaultColor)
@@ -196,6 +201,9 @@ class Ui_MainWindow(object):
         self.menuColors.addAction(self.actionJet)
         self.menuColors.addAction(self.actionCustom_Color_Scheme)
         self.menuColors.addSeparator()
+        self.menuColors.addAction(self.actionTable_From_Filtered_Points)
+        self.menuColors.addAction(self.actionTable_From_All_Points)
+        self.menuColors.addSeparator()
         self.menuColors.addAction(self.actionBackground_Color)
         self.menuVisualisation.addAction(self.actionBox)
         self.menuVisualisation.addAction(self.actionAxes)
@@ -203,6 +211,8 @@ class Ui_MainWindow(object):
         self.menuVisualisation.addAction(self.actionColorScale)
         self.menuVisualisation.addSeparator()
         self.menuVisualisation.addAction(self.actionRestore_Points)
+        self.menuVisualisation.addSeparator()
+        self.menuVisualisation.addAction(self.actionHistogram_Viewer)
         self.menuCamera.addAction(self.actionFront_View)
         self.menuCamera.addAction(self.actionSide_View)
         self.menuCamera.addAction(self.actionTop_VIew)
@@ -214,20 +224,8 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuVisualisation.menuAction())
         self.menubar.addAction(self.menuCamera.menuAction())
         
-        self.dockWidget = QtWidgets.QDockWidget("FilterData", MainWindow)
-        self.dockWidget.setFloating(False)
-        self.dockWidget.setFixedWidth(230)
-        self.dockWidget.setAllowedAreas(QtCore.Qt.LeftDockWidgetArea | QtCore.Qt.RightDockWidgetArea)
-        
-        def dockHide(self, event):
-            #self.hide()
-            event.ignore()
-            print("Rewrote Func closeEvent")
-        
-        QtWidgets.QDockWidget.closeEvent = dockHide
-        MainWindow.destroyed.connect(self.dockWidget.destroy)
         self.action_Open.triggered.connect(MainWindow.openDirectory)
-
+        
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -253,8 +251,7 @@ class Ui_MainWindow(object):
         self.actionFull_Cube.setText(_translate("MainWindow", "Full Cube"))
         self.actionIntensity.setText(_translate("MainWindow", "Intensity"))
         self.actionIntensity.setStatusTip(_translate("MainWindow", "Color of a point will be determined by the number of photons received"))
-        self.actionVariation.setText(_translate("MainWindow", "Variation"))
-        self.actionConfidence.setText(_translate("MainWindow", "Confidence"))
+        self.actionVariation.setText(_translate("MainWindow", "Sigma"))
         self.actionDepth.setText(_translate("MainWindow", "Depth"))
         self.actionDepth.setStatusTip(_translate("MainWindow", "Color of a point will be determined by its position along the Z axis"))
         self.actionDefaultColor.setText(_translate("MainWindow", "Default"))
@@ -290,6 +287,16 @@ class Ui_MainWindow(object):
         self.actionSTL.setStatusTip(_translate("MainWindow", "Export to the .STL format"))
         self.action_PLY.setText(_translate("MainWindow", ".PLY"))
         self.action_PLY.setStatusTip(_translate("MainWindow", "Export to the .PLY format"))
+        self.actionTable_From_Filtered_Points.setText(_translate("MainWindow", "Table From Filtered Points"))
+        self.actionTable_From_Filtered_Points.setStatusTip(_translate("MainWindow", "Rebuild the ColorMap from points that got trough the filters"))
+        self.actionTable_From_Filtered_Points.setShortcut(_translate("MainWindow", "Ctrl+F"))
+        self.actionTable_From_All_Points.setText(_translate("MainWindow", "Table From All Points"))
+        self.actionTable_From_All_Points.setStatusTip(_translate("MainWindow", "Rebuild the ColorMap from the points before applying filters"))
+        self.actionTable_From_All_Points.setShortcut(_translate("MainWindow", "Ctrl+G"))
+        self.actionHistogram_Viewer.setText(_translate("MainWindow", "Histogram Viewer..."))
+        self.actionHistogram_Viewer.setStatusTip(_translate("MainWindow", "Click on a pixel of the depthmap to visualize the corresponding histogram"))
+
+
 
 
 if __name__ == "__main__":

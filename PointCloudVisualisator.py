@@ -11,7 +11,7 @@ import numpy as np
 import warnings
 
 from InteractorStylePickPoints import InteractorStylePickPoints
-
+from GenerateFromFile import display_time
  
 class PointCloudVisualisator(QVTKRenderWindowInteractor):
         
@@ -20,22 +20,37 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
         points = vtk.vtkPoints()
         # Create the topology of the point (a vertex)
         vertices = vtk.vtkCellArray()
-        additionalData = vtk.vtkDoubleArray()
-        additionalData.SetNumberOfComponents(1)
-        additionalData.SetName("Intensity")
+        intensityData = vtk.vtkDoubleArray()
+        intensityData.SetNumberOfComponents(1)
+        intensityData.SetName("Intensity")
+        
+        sigmaData = vtk.vtkDoubleArray()
+        sigmaData.SetNumberOfComponents(1)
+        sigmaData.SetName("Sigma")
+        
+        depthData = vtk.vtkDoubleArray()
+        depthData.SetNumberOfComponents(1)
+        depthData.SetName('Depth')
+        
         for pi in interestPoints: 
             id = points.InsertNextPoint(pi.pos)
             #vtkCellArray::InsertNextCell	(	vtkIdType 	npts,const vtkIdType * 	pts )
             #Nombre de points puis tableau d'id des points
             vertices.InsertNextCell(1)
             vertices.InsertCellPoint(id)
-            additionalData.InsertNextValue(pi.intensity)
+            intensityData.InsertNextValue(pi.intensity)
+            sigmaData.InsertNextValue(pi.sigma)
+            depthData.InsertNextValue(pi.pos[2])
+            
         
         # Set the points and vertices we created as the geometry and topology of the polydata
         self.pointsData.SetPoints(points)
         self.pointsData.SetVerts(vertices)
-        self.pointsData.GetPointData().SetScalars(additionalData)
+        self.pointsData.GetPointData().AddArray(intensityData)
+        self.pointsData.GetPointData().AddArray(sigmaData)
+        self.pointsData.GetPointData().AddArray(depthData)
         
+        print(self.pointsData)
         
     def initOutline(self):
         #outline
@@ -93,7 +108,7 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
     def initScalarBar(self):
         self.scalarBar = vtk.vtkScalarBarActor()
         self.scalarBar.SetLookupTable(self.mapper.GetLookupTable())
-        self.scalarBar.SetTitle("Confidence")
+        self.scalarBar.SetTitle("Intensity")
         self.scalarBar.SetNumberOfLabels(3)
         self.scalarBar.SetDragable(True)
         self.scalarBar.SetVisibility(False)
@@ -106,6 +121,10 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
         between the passThrougs
         """
 
+        self.firstAssignAttribute = vtk.vtkAssignAttribute()
+        self.firstAssignAttribute.SetInputData(self.pointsData)
+        self.firstAssignAttribute.Assign("Intensity", "SCALARS", "POINT_DATA")
+
         self.selectionNode = vtk.vtkSelectionNode()
         self.selectionNode.SetFieldType(1) # POINT
         self.selectionNode.SetContentType(4) #INDICES
@@ -114,25 +133,30 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
         self.selection = vtk.vtkSelection()
         self.selection.AddNode(self.selectionNode)        
         self.extractSelection = vtk.vtkExtractSelection()
-        self.extractSelection.SetInputData(0, self.pointsData)
+        self.extractSelection.SetInputConnection(0, self.firstAssignAttribute.GetOutputPort())
         self.extractSelection.SetInputData(1, self.selection)
         
         self.geometryFilter = vtk.vtkGeometryFilter()
         self.geometryFilter.SetInputConnection(self.extractSelection.GetOutputPort())
         
-        
         self.listPassThrough = [vtk.vtkPassThrough()]
         self.listPassThrough[0].SetInputConnection(self.geometryFilter.GetOutputPort())
         
-        for n in range(5):
+        for n in range(6):
             newPassThrough = vtk.vtkPassThrough()
             newPassThrough.SetInputConnection(self.listPassThrough[n].GetOutputPort())
             self.listPassThrough.append(newPassThrough)
                 
+        #We need to be able to change the scalars right before the mapper
+        self.lastAssignAttribute = vtk.vtkAssignAttribute()
+        self.lastAssignAttribute.SetInputConnection(self.listPassThrough[-1].GetOutputPort())
+        self.lastAssignAttribute.Assign("Intensity", "SCALARS", "POINT_DATA")
         
         #Connecting the mapper to the last element of the list
         self.mapper = vtk.vtkPolyDataMapper()
-        self.mapper.SetInputConnection(self.listPassThrough[-1].GetOutputPort())
+        self.mapper.SetInputConnection(self.lastAssignAttribute.GetOutputPort())
+        print(self.listPassThrough[-1].GetOutput())
+        self.mapper.SetScalarModeToUsePointData()
                 
         actor = vtk.vtkActor()
         actor.SetMapper(self.mapper)
@@ -160,37 +184,57 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
         boundingBox.SetBounds(self.extractSelection.GetOutput().GetBounds())
         self.extractVolume.SetImplicitFunction(boundingBox)
         self.listPassThrough[1].SetInputConnection(self.extractVolume.GetOutputPort())
+    
     def disableDepthFilter(self):
         self.listPassThrough[1].SetInputConnection(self.listPassThrough[0].GetOutputPort())
     
     def enableConfidenceFilter(self):
-        self.thresholdIn = vtk.vtkThresholdPoints()
-        self.thresholdIn.SetInputConnection(self.listPassThrough[1].GetOutputPort())
-        self.listPassThrough[2].SetInputConnection(self.thresholdIn.GetOutputPort())
-        self.thresholdIn.ThresholdByUpper(0)
+        aa = vtk.vtkAssignAttribute()
+        aa.SetInputConnection(self.listPassThrough[1].GetOutputPort())
+        aa.Assign("Intensity", "SCALARS", "POINT_DATA")
+        aa.Update()
+        
+        self.thresholdIntensity = vtk.vtkThresholdPoints()
+        self.thresholdIntensity.SetInputConnection(aa.GetOutputPort())
+        self.listPassThrough[2].SetInputConnection(self.thresholdIntensity.GetOutputPort())
+        self.thresholdIntensity.ThresholdByUpper(0)
              
     def disableConfidenceFilter(self):
         self.listPassThrough[2].SetInputConnection(self.listPassThrough[1].GetOutputPort())
+        
+    def enableSigmaFilter(self):
+        aa = vtk.vtkAssignAttribute()
+        aa.SetInputConnection(self.listPassThrough[2].GetOutputPort())
+        aa.Assign("Sigma", "SCALARS", "POINT_DATA")
+        aa.Update()
+        
+        self.thresholdSigma = vtk.vtkThresholdPoints()
+        self.thresholdSigma.SetInputConnection(aa.GetOutputPort())
+        self.listPassThrough[3].SetInputConnection(self.thresholdSigma.GetOutputPort())
+        self.thresholdSigma.ThresholdByUpper(0)
+    
+    def disableSigmaFilter(self):
+        self.listPassThrough[3].SetInputConnection(self.listPassThrough[2].GetOutputPort())
     
     def enableOutlierFilter(self):
         self.outlierFilter =  vtk.vtkRadiusOutlierRemoval()
         self.outlierFilter.SetNumberOfNeighbors(0)
         self.outlierFilter.SetRadius(0)
         self.outlierFilter.GenerateVerticesOn()
-        self.outlierFilter.SetInputConnection(self.listPassThrough[2].GetOutputPort()) 
-        self.listPassThrough[3].SetInputConnection(self.outlierFilter.GetOutputPort())
+        self.outlierFilter.SetInputConnection(self.listPassThrough[3].GetOutputPort()) 
+        self.listPassThrough[4].SetInputConnection(self.outlierFilter.GetOutputPort())
         
     def disableOutlierFilter(self):
-        self.listPassThrough[3].SetInputConnection(self.listPassThrough[2].GetOutputPort())
+        self.listPassThrough[4].SetInputConnection(self.listPassThrough[3].GetOutputPort())
         
     def enableMesh(self):
         self.meshFilter = vtk.vtkDelaunay2D()
         self.meshFilter.SetAlpha(0)
-        self.meshFilter.SetInputConnection(self.listPassThrough[3].GetOutputPort())      
-        self.listPassThrough[4].SetInputConnection(self.meshFilter.GetOutputPort())
+        self.meshFilter.SetInputConnection(self.listPassThrough[4].GetOutputPort())      
+        self.listPassThrough[5].SetInputConnection(self.meshFilter.GetOutputPort())
 
     def disableMesh(self):
-        self.listPassThrough[4].SetInputConnection(self.listPassThrough[3].GetOutputPort())
+        self.listPassThrough[5].SetInputConnection(self.listPassThrough[4].GetOutputPort())
         
     def enableMeshSmoothing(self):
         self.smoothFilter = vtk.vtkSmoothPolyDataFilter()
@@ -198,20 +242,15 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
         self.smoothFilter.SetRelaxationFactor(0)
         self.smoothFilter.FeatureEdgeSmoothingOff()
         self.smoothFilter.BoundarySmoothingOn()
-        self.smoothFilter.SetInputConnection(self.listPassThrough[4].GetOutputPort())
-        self.listPassThrough[5].SetInputConnection(self.smoothFilter.GetOutputPort())
+        self.smoothFilter.SetInputConnection(self.listPassThrough[5].GetOutputPort())
+        self.listPassThrough[6].SetInputConnection(self.smoothFilter.GetOutputPort())
 
     def disableMeshSmoothing(self):
-        self.listPassThrough[5].SetInputConnection(self.listPassThrough[4].GetOutputPort())
+        self.listPassThrough[6].SetInputConnection(self.listPassThrough[5].GetOutputPort())
     
-    
-    def centerCamera(self):
-        """
-        Recentre la caméra en (0, 0, 0), fait face aux points
-        """
-        pass
     
     def setZBounds(self, z1, z2):
+        print("[PointCloudsVisualisator] setZBounds ", z1, z2)
         bounds = self.listPassThrough[0].GetOutput().GetBounds()
         boundingBox = vtk.vtkBox()
         boundingBox.SetBounds(bounds[0], bounds[1], bounds[2], bounds[3], float(z1), float(z2))
@@ -220,8 +259,13 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
         self.repaint()
         
     def setConfidenceThreshold(self, thres):
-        self.thresholdIn.ThresholdByUpper(thres)
-        self.thresholdIn.Modified()
+        self.thresholdIntensity.ThresholdByUpper(thres)
+        self.thresholdIntensity.Modified()
+        self.repaint()
+        
+    def setSigmaThreshold(self, thres):
+        self.thresholdSigma.ThresholdByLower(thres)
+        self.thresholdSigma.Modified()
         self.repaint()
         
     def setOutlierOptions(self, neighbors, rad):
@@ -232,12 +276,14 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
 
         
     def setMeshAlpha(self, alpha):
+        print("[PCV] setMeshAlpha", alpha)
         self.meshFilter.SetAlpha(alpha)
         self.meshFilter.Modified()
         self.repaint()
 
         
     def setSmoothingOptions(self, iterations, relaxation):
+        print("[PCV] setSmoothingOptions", iterations, relaxation)
 
         self.smoothFilter.SetNumberOfIterations(iterations)
         self.smoothFilter.SetRelaxationFactor(relaxation)
@@ -256,7 +302,31 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
         plyWriter.SetInputData(self.listPassThrough[-1].GetOutput())
         plyWriter.Write()
     
-    def customColoriser(self, RGBlistColor):
+    @display_time
+    def colorByIntensity(self):
+        self.scalarBar.SetTitle("Intensity [%]")
+        self.lastAssignAttribute.Assign("Intensity", "SCALARS", "POINT_DATA")
+        self.firstAssignAttribute.Assign("Intensity", "SCALARS", "POINT_DATA")
+        self.mapper.SetScalarRange(self.colorMapPoints.GetPointData().GetAbstractArray('Intensity').GetRange())
+
+    
+    @display_time
+    def colorBySigma(self):
+        self.scalarBar.SetTitle("Sigma [%]")
+        self.lastAssignAttribute.Assign("Sigma", "SCALARS", "POINT_DATA")
+        self.firstAssignAttribute.Assign("Sigma", "SCALARS", "POINT_DATA")
+        self.mapper.SetScalarRange(self.colorMapPoints.GetPointData().GetAbstractArray('Sigma').GetRange())
+
+
+    @display_time
+    def colorByDepth(self):
+        self.scalarBar.SetTitle("Depth [m]")
+        self.lastAssignAttribute.Assign("Depth", "SCALARS", "POINT_DATA")
+        self.firstAssignAttribute.Assign("Depth", "SCALARS", "POINT_DATA")
+        self.mapper.SetScalarRange(self.colorMapPoints.GetPointData().GetAbstractArray('Depth').GetRange())
+
+    
+    def customColoriser2(self, RGBlistColor):
         lut = vtk.vtkColorTransferFunction()
         scalarRange = self.pointsData.GetScalarRange()
         x = np.linspace(scalarRange[0], scalarRange[1], len(RGBlistColor))
@@ -265,6 +335,19 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
         lut.Build()
         self.mapper.SetLookupTable(lut)
         self.scalarBar.SetLookupTable(self.mapper.GetLookupTable())
+
+    def customColoriser(self, RGBlistColor):
+        lut = vtk.vtkLookupTable()
+        lut.IndexedLookupOff()
+        lut.SetTableRange(self.pointsData.GetScalarRange())
+        lut.SetNumberOfTableValues(len(RGBlistColor))
+
+        for i in range(len(RGBlistColor)):
+            lut.SetTableValue(i, RGBlistColor[i][0], RGBlistColor[i][1], RGBlistColor[i][2])
+        lut.Build()
+        self.mapper.SetLookupTable(lut)
+        self.scalarBar.SetLookupTable(self.mapper.GetLookupTable())
+
         
     def defaultColoriser(self):
         lut = vtk.vtkLookupTable()
@@ -273,8 +356,8 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
 
     def customAlphaColoriser(self):
         lut = vtk.vtkLookupTable()
-        lut.SetHueRange(0.0,1.0)
         lut.SetAlphaRange(0.0, 1.0)
+        lut.SetSaturationRange(0.0,0.0)
         lut.SetRampToSCurve()
         lut.Build()
         self.mapper.SetLookupTable(lut)
@@ -333,6 +416,7 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
         
     def addBannedIds(self, ids):
         for i in range(ids.GetNumberOfTuples()):
+            #print(ids.GetValue(i))
             self.bannedIds.InsertNextValue(ids.GetValue(i))
         self.selectionNode.SetSelectionList(self.bannedIds)
         self.selectionNode.Modified()
@@ -341,11 +425,22 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
         self.bannedIds = vtk.vtkIdTypeArray()
         self.selectionNode.SetSelectionList(self.bannedIds)
         self.selectionNode.Modified()
+        
+    @display_time
+    def mapColorsFromFilteredPoints(self):
+        self.colorMapPoints = self.lastAssignAttribute.GetOutput()
+        self.mapper.SetScalarRange(self.colorMapPoints.GetScalarRange())
+    
+    @display_time
+    def mapColorsFromAllPoints(self):
+        self.colorMapPoints = self.firstAssignAttribute.GetOutput()
+        self.mapper.SetScalarRange(self.colorMapPoints.GetScalarRange())
 
  
     def __init__(self, generator):
         super().__init__()
         self.pointsData = vtk.vtkPolyData()
+        self.colorMapPoints =  self.pointsData
         self.ren = vtk.vtkRenderer()
         self.GetRenderWindow().AddRenderer(self.ren)
         self.iren = self.GetRenderWindow().GetInteractor()

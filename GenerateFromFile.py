@@ -8,6 +8,7 @@ import numpy as np
 import os
 from matplotlib import cm, colors
 import time
+
 def display_time(func):
     def decorator(self, *args):
         startTime = time.time()
@@ -25,9 +26,8 @@ def display_time(func):
 class LidarDataInterpreter:
     def __init__(self, _folder):
         self.data = np.load(os.path.join(os.getcwd(), _folder, 'depthMap.npz'))
-        self.oneImage = np.load(os.path.join(os.getcwd(), _folder, 'image000.npz'))
         #On veut les indices dans l'histogramme correspondant aux distances min / max
-        self.distanceAxis = self.oneImage['distanceAxis']
+        self.distanceAxis = self.data['distanceAxis']
         #self.dMin = int((np.abs(distanceAxis - _dmin)).argmin())
         #self.dMax = int((np.abs(distanceAxis - _dmax)).argmin())
         self.dMin = 0
@@ -48,6 +48,9 @@ class LidarDataInterpreter:
         
         sumCountsAVG /= np.nanmax(sumCountsAVG)
         
+        sigma = self.data['sigma']
+        sigma /= np.nanmax(sigma)
+        
         def pointGenerator():
             for iy in range(size):
                 for ix in range(size):
@@ -59,6 +62,7 @@ class LidarDataInterpreter:
                     y = -1 * (iy-size/2) * z * np.tan(alpha) / (size/2)
                     point = InterestPoint((x,y,z))
                     point.intensity = sumCountsAVG[iy,ix]
+                    point.sigma = sigma[iy,ix]
                     yield point
                     
         return pointGenerator()
@@ -66,6 +70,8 @@ class LidarDataInterpreter:
     
     def getFullCube(self):
         dataCube = self.data['dataCubeAVG']
+        print(dataCube.shape)
+        print(self.distanceAxis[0])
         size = dataCube.shape[0]
         alpha = 2.9 * np.pi / 180
         
@@ -89,11 +95,14 @@ class LidarDataInterpreter:
                         y = -1 * (iy-size/2) * z * np.tan(alpha) / (size/2)
                         point = InterestPoint((x,y,z))
                         point.intensity = dataCube[iy,ix,iz]
+                        point.sigma = 1.0
                         yield point
         return pointGenerator()
 
     def getHalfFullCube(self):
         dataCube = self.data['dataCubeAVG']
+        print(dataCube.shape)
+        print(self.distanceAxis[0])
         size = dataCube.shape[0]
         alpha = 2.9 * np.pi / 180
         
@@ -126,7 +135,7 @@ class InterestPoint:
     def __init__(self, _pos, _intensity = None, _variation = None):
         self.pos = _pos
         self.intensity = _intensity
-        self.var = _variation
+        self.sigma = _variation
 
     @property
     def pos(self):
@@ -147,15 +156,13 @@ class InterestPoint:
         self.__intensity = val
         
     @property
-    def var(self):
-        return self.__var
+    def sigma(self):
+        return self.__sigma
 
-    @var.setter
-    def var(self, val):
-        self.__var = val
+    @sigma.setter
+    def sigma(self, val):
+        self.__sigma = val
     
-
-
 if __name__ == "__main__":
     import sys
     from PyQt5.QtWidgets import (QMainWindow, QLabel, QComboBox,QLineEdit,

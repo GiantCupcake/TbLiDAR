@@ -6,7 +6,6 @@ Created on Fri Jun 23 15:15:29 2017
 """
 
 from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtWidgets import QFileDialog
 
 import UI_MainWindow
 from centralWidget import CentralWidget
@@ -17,28 +16,44 @@ class MainWindow(QtWidgets.QMainWindow, UI_MainWindow.Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.settings = QtCore.QSettings("CSEM", "LiDARViewer")
-        self.setupUi(self)
-        self.centralWidget = None
-
+        self.setupUi(self)        
         self.readSettings()
-        self.activateCheckedActions()
 
         
-    def closeEvent(self, event):        
+    def closeEvent(self, event):
+        print("CloseEvent called saving settings")
+        
         self.settings.setValue("geometry", self.saveGeometry())
         self.settings.setValue("windowState", self.saveState())
         super().closeEvent(event)
-       
+      
+    def openDirectory(self, s):
+        fd = QtWidgets.QFileDialog()
+        fd.setFileMode(QtWidgets.QFileDialog.Directory)
+        if fd.exec():
+            self.dockWidget = QtWidgets.QDockWidget("FilterData", MainWindow)
+            self.dockWidget.setFloating(False)
+            self.dockWidget.setFixedWidth(230)
+            self.dockWidget.setAllowedAreas(QtCore.Qt.LeftDockWidgetArea | QtCore.Qt.RightDockWidgetArea)
+            
+            self.centralWidget = CentralWidget(self, fd.selectedFiles()[0])
+            self.setupSlots(self.centralWidget)
+            self.setCentralWidget(self.centralWidget)
+            self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.dockWidget)
+            self.activateCheckedActions()
+
         
     def readSettings(self):
         self.restoreGeometry(self.settings.value("geometry", type = QtCore.QByteArray))
         self.restoreState(self.settings.value("windowState", type = QtCore.QByteArray))
         
     def activateCheckedActions(self):
+        print("[MainWindow] activateCheckedAction")
         self.actionGroupDataReader.checkedAction().trigger()
-        self.actionGroupColorsFrom.checkedAction().trigger()
+        #self.actionGroupColorsFrom.checkedAction().trigger()
         self.actionGroupColorsScheme.checkedAction().trigger()
         
+        print("is it checked ? ",self.actionBox.isChecked())
         if self.actionBox.isChecked():    
             self.actionBox.trigger()
             self.actionBox.trigger()
@@ -52,16 +67,7 @@ class MainWindow(QtWidgets.QMainWindow, UI_MainWindow.Ui_MainWindow):
             self.actionColorScale.trigger()
             self.actionColorScale.trigger()
 
-
-    def openDirectory(self, s):
-        #TODO: Rewrite properly
-        fd = QFileDialog()
-        fd.setFileMode(QFileDialog.Directory)
-        if fd.exec():
-            self.centralWidget = CentralWidget(self, fd.selectedFiles()[0])
-            self.setupSlots(self.centralWidget)
-            self.setCentralWidget(self.centralWidget)
-            self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.dockWidget)
+        
         
 if __name__ == "__main__":
     import sys
