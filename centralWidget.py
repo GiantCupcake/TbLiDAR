@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 """
+This class will be the bridge between each QtWidgets, and the MainWindow.
+Every function corresponds to a certain signal coming from the filter panel
+or the menu from MainWindow. Each action will have an effect on the 
+PointCloudVisualisator.
+
 Created on Fri Jun 23 14:20:25 2017
 
-@author: maxpi
+@author: Maxime Piergiovanni
 """
 
-import sys
-from PyQt5.QtWidgets import (QMainWindow, QLabel, QComboBox,QLineEdit,
-                            QApplication, QWidget, QPushButton, QDoubleSpinBox,
-                            QHBoxLayout, QVBoxLayout, QSlider, QFileDialog,
-                            QColorDialog, QDockWidget)
+from PyQt5.QtWidgets import (QApplication, QWidget, QHBoxLayout,
+                             QFileDialog, QColorDialog)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QCursor
 from GenerateFromFile import LidarDataInterpreter, display_time
@@ -17,11 +19,11 @@ from RangeSliders import ControlsWidget
 from HistogramViewer import HistogramViewer
 from matplotlib import cm, colors
 
-import os
 import warnings
 
 
 from PointCloudVisualisator import PointCloudVisualisator
+
 
 def waiting_effects(func):
     def decorator(self, *args):
@@ -33,8 +35,7 @@ def waiting_effects(func):
             print("Error {}".format(e.args[0]))
         finally:
             QApplication.restoreOverrideCursor()
-    return decorator
-
+    return decorator 
 
 class CentralWidget(QWidget):
     
@@ -124,16 +125,11 @@ class CentralWidget(QWidget):
         if s == Qt.Checked:
             self.pcv.enableMeshSmoothing()
         
-    @display_time
-    def openDirectory(self, s):
-        #TODO: Rewrite properly
-        print("[CentralWidget] openDirectory")
             
     @display_time
     @waiting_effects           
     def fullCubeMode(self, s):
         #TODO: Rewrite properly
-        print("[CentralWidget] fullCubeMode")
         interpreter = LidarDataInterpreter(self.currentFolder)
         self.pcv.updatePoints(interpreter.getFullCube())
         
@@ -141,7 +137,6 @@ class CentralWidget(QWidget):
     @display_time
     def depthMapMode(self, s):
         #TODO: Rewrite properly
-        print("[CentralWidget] depthMapMode")
         interpreter = LidarDataInterpreter(self.currentFolder)
         self.pcv.updatePoints(interpreter.getPointsFromDepthMap())
         
@@ -153,7 +148,6 @@ class CentralWidget(QWidget):
         fd.setNameFilter("STL format file (*.stl)");
         if fd.exec():
             fileNames = fd.selectedFiles()
-            print("Saving to {0}".format(fileNames[0]))
             self.pcv.writeSTL(fileNames[0])
     
     def writePLY(self, s):
@@ -162,7 +156,6 @@ class CentralWidget(QWidget):
         fd.setNameFilter("PLY format file (*.ply)");
         if fd.exec():
             fileNames = fd.selectedFiles()
-            print("Saving to {0}".format(fileNames[0]))
             self.pcv.writePLY(fileNames[0])
         
     def customColoriser(self, s):
@@ -173,19 +166,16 @@ class CentralWidget(QWidget):
         self.pcv.defaultColoriser()
         
     def colorSchemeHot(self, s):
-        print("[CentralWidget] colorSchemeHot")
         colormap = cm.ScalarMappable(colors.Normalize(0, 20), 'hot')
         points = colormap.to_rgba(range(20))
         self.pcv.customColoriser(points)
         
     def colorSchemeJet(self, s):
-        print("[CentralWidget] colorSchemeJet")
         colormap = cm.ScalarMappable(colors.Normalize(0, 20), 'jet')
         points = colormap.to_rgba(range(20))
         self.pcv.customColoriser(points)
         
     def colorSchemeWhite(self, s):
-        print("[CentralWidget] colorSchemeWhite")
         self.pcv.customAlphaColoriser()
         #self.pcv.customColoriser(((1.,1.,1.,0.),(1.,1.,1.,1.)))
         
@@ -204,20 +194,16 @@ class CentralWidget(QWidget):
         cd.setOption(QColorDialog.ShowAlphaChannel, False)
         if cd.exec():
             qColor = cd.selectedColor()
-            print((qColor.redF(), qColor.greenF(), qColor.blueF()))
             self.pcv.setBackgroundColor((qColor.redF(), qColor.greenF(), qColor.blueF()))
     
     def buildCMFromFilteredPoints(self, s):
-        print("[CentralWidget] buildCMFromFilteredPoints")
         self.pcv.mapColorsFromFilteredPoints()
     
 
     def buildCMFromAllPoints(self, s):
-        print("[CentralWidget] buildCMFromAllPoints")
         self.pcv.mapColorsFromAllPoints()
     
     def showOutliningCube(self, s):
-        print(s)
         if s == True:
             self.pcv.showOutliningCube()
         if s == False:
@@ -225,7 +211,6 @@ class CentralWidget(QWidget):
             
     
     def showAxes(self, s):
-        print(s)
         if s == True:
             self.pcv.showAxes()
         if s == False:
@@ -233,21 +218,18 @@ class CentralWidget(QWidget):
 
     
     def showDepthIndicator(self, s):
-        print(s)
         if s == True:
             self.pcv.showDepthIndicator()
         if s == False:
             self.pcv.hideDepthIndicator()
             
     def showLookupTable(self, s):
-        print(s)
         if s == True:
             self.pcv.showLookupTable()
         if s == False:
             self.pcv.hideLookupTable()
         
     def restoreDeletedPoints(self, s):
-        print("[CentralWidget] restoreDeletedPoints")
         self.pcv.clearBannedIds()
     
     def displayFrontView(self, s):
@@ -263,16 +245,7 @@ class CentralWidget(QWidget):
         self.pcv.displayIsometricView()
         
     def histogramViewer(self, s):
-        print("[CentralWidget] histogramViewer")
         self.hs = HistogramViewer(self.currentFolder)
         self.hs.show()
         
-   
-        
-if __name__ == '__main__':
-
-    app = QApplication(sys.argv)
-    ex = CentralWidget(None)
-    ex.show()
-    ex.openDirectory("ex")
-    sys.exit(app.exec_())
+ 

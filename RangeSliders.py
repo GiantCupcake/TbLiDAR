@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 """
+Various custom QtWidgets used to filter our Data
+
 Created on Mon Jul  3 14:38:11 2017
 
-@author: maxpi
+@author: Maxime Piergiovanni
 """
 
 from PyQt5.QtWidgets import (QLabel, QWidget, QHBoxLayout, QVBoxLayout, QSlider,
@@ -143,15 +145,12 @@ class MeshOptionsWidget(QWidget):
         self.relaxationFactor.valueChanged.connect(self.relaxationChanged)
         
     def emitAlphaChanged(self, s):
-        print("[MeshOptionsWidget] emitting alphaChanged :", s)
         self.alphaChanged.emit(s)
         
     def iterationNumberChanged(self, s):
-        print("[MeshOptionsWidget] emitting smoothOptionsChanged :", s, self.relaxationFactor.value())
         self.smoothOptionsChanged.emit(s, self.relaxationFactor.value())
     
     def relaxationChanged(self, s):
-        print("[MeshOptionsWidget] emitting alphaChanged :", self.iterationNumber.value(), s)
         self.smoothOptionsChanged.emit(self.iterationNumber.value(), s)
 
    
@@ -183,11 +182,9 @@ class OutlierFilterWidget(QWidget):
         self.spinBoxRadius.valueChanged.connect(self.radiusChanged)
         
     def neighborsChanged(self, s):
-        print("[OutlierFilterWidget] emitting : ", s, self.spinBoxRadius.value())
         self.optionsChanged.emit(s, self.spinBoxRadius.value())
         
     def radiusChanged(self, s):
-        print("[OutlierFilterWidget] emitting : ", self.neighborCount.value(), s)
         self.optionsChanged.emit(self.neighborCount.value(), s)
 
 
@@ -294,18 +291,3 @@ class LabeledSlider(QWidget):
         x = self.slider.width() * ((s - self.slider.minimum()) / (self.slider.maximum() - self.slider.minimum() + 1))
         self.currentLabel.move(x + 25, 0)
      
-
-def printChanged(b, a):
-    print(b, a)            
-        
-if __name__ == "__main__":
-    import sys
-    app = QApplication(sys.argv)
-    MainWindow = ControlsWidget()
-    
-    MainWindow.outlierFilter.widget.optionsChanged.connect(printChanged)
-    #MainWindow = MeshOptionsWidget()
-
-    MainWindow.show()
-
-    sys.exit(app.exec_())

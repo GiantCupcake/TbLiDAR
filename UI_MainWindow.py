@@ -226,6 +226,12 @@ class Ui_MainWindow(object):
         
         self.action_Open.triggered.connect(MainWindow.openDirectory)
         
+        self.dockWidget = QtWidgets.QDockWidget("FilterData", MainWindow)
+        self.dockWidget.setFloating(False)
+        self.dockWidget.setFixedWidth(230)
+        self.dockWidget.setAllowedAreas(QtCore.Qt.LeftDockWidgetArea | QtCore.Qt.RightDockWidgetArea)
+        MainWindow.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.dockWidget)
+        
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -295,16 +301,3 @@ class Ui_MainWindow(object):
         self.actionTable_From_All_Points.setShortcut(_translate("MainWindow", "Ctrl+G"))
         self.actionHistogram_Viewer.setText(_translate("MainWindow", "Histogram Viewer..."))
         self.actionHistogram_Viewer.setStatusTip(_translate("MainWindow", "Click on a pixel of the depthmap to visualize the corresponding histogram"))
-
-
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())
-

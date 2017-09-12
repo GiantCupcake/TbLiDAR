@@ -1,14 +1,25 @@
 # -*- coding: utf-8 -*-
 """
+This is the core class of the application.
+When constructed, this objects will setup an almost empty VTK pipeline, you then
+have to call one of the numerous functions that will add parts to the pipeline
+to treat your data.
+
+The class is very easily interfaceable with any GUI library out there, you will
+have to change the parent class from QVTKRenderWindowInteractor to the one
+that will more suit your need.
+
+Then, it is only a case of linking the methods of this class to your GUI.
+
 Created on Fri Jun 16 11:13:43 2017
 
-@author: maxpi
+@author: Maxime Piergiovanni
 """
 
 import vtk
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 import numpy as np
-import warnings
+
 
 from InteractorStylePickPoints import InteractorStylePickPoints
 from GenerateFromFile import display_time
@@ -50,7 +61,6 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
         self.pointsData.GetPointData().AddArray(sigmaData)
         self.pointsData.GetPointData().AddArray(depthData)
         
-        print(self.pointsData)
         
     def initOutline(self):
         #outline
@@ -155,7 +165,6 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
         #Connecting the mapper to the last element of the list
         self.mapper = vtk.vtkPolyDataMapper()
         self.mapper.SetInputConnection(self.lastAssignAttribute.GetOutputPort())
-        print(self.listPassThrough[-1].GetOutput())
         self.mapper.SetScalarModeToUsePointData()
                 
         actor = vtk.vtkActor()
@@ -187,6 +196,7 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
     
     def disableDepthFilter(self):
         self.listPassThrough[1].SetInputConnection(self.listPassThrough[0].GetOutputPort())
+        self.repaint()
     
     def enableConfidenceFilter(self):
         aa = vtk.vtkAssignAttribute()
@@ -201,6 +211,7 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
              
     def disableConfidenceFilter(self):
         self.listPassThrough[2].SetInputConnection(self.listPassThrough[1].GetOutputPort())
+        self.repaint()
         
     def enableSigmaFilter(self):
         aa = vtk.vtkAssignAttribute()
@@ -215,6 +226,7 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
     
     def disableSigmaFilter(self):
         self.listPassThrough[3].SetInputConnection(self.listPassThrough[2].GetOutputPort())
+        self.repaint()
     
     def enableOutlierFilter(self):
         self.outlierFilter =  vtk.vtkRadiusOutlierRemoval()
@@ -226,6 +238,7 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
         
     def disableOutlierFilter(self):
         self.listPassThrough[4].SetInputConnection(self.listPassThrough[3].GetOutputPort())
+        self.repaint()
         
     def enableMesh(self):
         self.meshFilter = vtk.vtkDelaunay2D()
@@ -235,6 +248,7 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
 
     def disableMesh(self):
         self.listPassThrough[5].SetInputConnection(self.listPassThrough[4].GetOutputPort())
+        self.repaint()
         
     def enableMeshSmoothing(self):
         self.smoothFilter = vtk.vtkSmoothPolyDataFilter()
@@ -247,10 +261,10 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
 
     def disableMeshSmoothing(self):
         self.listPassThrough[6].SetInputConnection(self.listPassThrough[5].GetOutputPort())
+        self.repaint()
     
     
     def setZBounds(self, z1, z2):
-        print("[PointCloudsVisualisator] setZBounds ", z1, z2)
         bounds = self.listPassThrough[0].GetOutput().GetBounds()
         boundingBox = vtk.vtkBox()
         boundingBox.SetBounds(bounds[0], bounds[1], bounds[2], bounds[3], float(z1), float(z2))
@@ -276,14 +290,12 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
 
         
     def setMeshAlpha(self, alpha):
-        print("[PCV] setMeshAlpha", alpha)
         self.meshFilter.SetAlpha(alpha)
         self.meshFilter.Modified()
         self.repaint()
 
         
     def setSmoothingOptions(self, iterations, relaxation):
-        print("[PCV] setSmoothingOptions", iterations, relaxation)
 
         self.smoothFilter.SetNumberOfIterations(iterations)
         self.smoothFilter.SetRelaxationFactor(relaxation)
@@ -416,7 +428,6 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
         
     def addBannedIds(self, ids):
         for i in range(ids.GetNumberOfTuples()):
-            #print(ids.GetValue(i))
             self.bannedIds.InsertNextValue(ids.GetValue(i))
         self.selectionNode.SetSelectionList(self.bannedIds)
         self.selectionNode.Modified()
@@ -460,29 +471,3 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
         self.initScalarBar()
 
   
-    @property
-    def generator(self):
-        return self._generator
-
-    @generator.setter
-    def generator(self, val):
-        self._generator = val
-        
-    @property
-    def dataFilter(self):
-        return self._dataFilter
-
-    @dataFilter.setter
-    def dataFilter(self, val):
-        self._dataFilter = val
-        self.updatePoints()
-    
-    @property
-    def coloriser(self):
-        return self._coloriser
-
-    @coloriser.setter
-    def coloriser(self, val):
-        self._coloriser = val
-        self.updateColors()
- 

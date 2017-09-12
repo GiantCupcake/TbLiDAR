@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 """
+This is the entry point of the program, run this file to launch the application
+All UI setting and the slot connection is done in UI_MainWindow.py
+
 Created on Fri Jun 23 15:15:29 2017
 
-@author: maxpi
+@author: Maxime Piergiovanni
 """
 
 from PyQt5 import QtWidgets, QtCore
@@ -16,31 +19,26 @@ class MainWindow(QtWidgets.QMainWindow, UI_MainWindow.Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.settings = QtCore.QSettings("CSEM", "LiDARViewer")
-        self.setupUi(self)        
+        self.setupUi(self)
         self.readSettings()
 
         
     def closeEvent(self, event):
-        print("CloseEvent called saving settings")
-        
         self.settings.setValue("geometry", self.saveGeometry())
         self.settings.setValue("windowState", self.saveState())
         super().closeEvent(event)
       
     def openDirectory(self, s):
-        fd = QtWidgets.QFileDialog()
-        fd.setFileMode(QtWidgets.QFileDialog.Directory)
-        if fd.exec():
-            self.dockWidget = QtWidgets.QDockWidget("FilterData", MainWindow)
-            self.dockWidget.setFloating(False)
-            self.dockWidget.setFixedWidth(230)
-            self.dockWidget.setAllowedAreas(QtCore.Qt.LeftDockWidgetArea | QtCore.Qt.RightDockWidgetArea)
-            
-            self.centralWidget = CentralWidget(self, fd.selectedFiles()[0])
-            self.setupSlots(self.centralWidget)
-            self.setCentralWidget(self.centralWidget)
-            self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.dockWidget)
-            self.activateCheckedActions()
+        try:
+            fd = QtWidgets.QFileDialog()
+            fd.setFileMode(QtWidgets.QFileDialog.Directory)
+            if fd.exec():
+                self.centralWidget = CentralWidget(self, fd.selectedFiles()[0])
+                self.setupSlots(self.centralWidget)
+                self.setCentralWidget(self.centralWidget)
+                self.activateCheckedActions()
+        except:
+            self.statusbar.showMessage("There was an error opening this folder", 3000)
 
         
     def readSettings(self):
@@ -48,12 +46,9 @@ class MainWindow(QtWidgets.QMainWindow, UI_MainWindow.Ui_MainWindow):
         self.restoreState(self.settings.value("windowState", type = QtCore.QByteArray))
         
     def activateCheckedActions(self):
-        print("[MainWindow] activateCheckedAction")
         self.actionGroupDataReader.checkedAction().trigger()
-        #self.actionGroupColorsFrom.checkedAction().trigger()
         self.actionGroupColorsScheme.checkedAction().trigger()
         
-        print("is it checked ? ",self.actionBox.isChecked())
         if self.actionBox.isChecked():    
             self.actionBox.trigger()
             self.actionBox.trigger()
