@@ -45,8 +45,10 @@
      </property>
      <addaction name="actionSTL"/>
      <addaction name="action_PLY"/>
+     <addaction name="action_VTK"/>
     </widget>
     <addaction name="action_Open"/>
+    <addaction name="actionOpen_VTK_file"/>
     <addaction name="menu_Recents"/>
     <addaction name="menu_Export"/>
    </widget>
@@ -55,9 +57,9 @@
      <string>&amp;DataReader</string>
     </property>
     <addaction name="actionDepthMap"/>
-    <addaction name="actionConvolution"/>
-    <addaction name="actionGaussian_Fit"/>
     <addaction name="actionFull_Cube"/>
+    <addaction name="actionCustom1"/>
+    <addaction name="actionCustom2"/>
    </widget>
    <widget class="QMenu" name="menuColors">
     <property name="title">
@@ -105,7 +107,7 @@
   <widget class="QStatusBar" name="statusbar"/>
   <action name="action_Open">
    <property name="text">
-    <string>&amp;Open</string>
+    <string>&amp;Open Numpy Archives...</string>
    </property>
    <property name="statusTip">
     <string>Open Folder containing the Numpy archives</string>
@@ -395,6 +397,26 @@
   <action name="actionBackground_Color">
    <property name="text">
     <string>Background Color</string>
+   </property>
+  </action>
+  <action name="actionOpen_VTK_file">
+   <property name="text">
+    <string>Open VTK file...</string>
+   </property>
+  </action>
+  <action name="action_VTK">
+   <property name="text">
+    <string>.VTK</string>
+   </property>
+  </action>
+  <action name="actionCustom1">
+   <property name="text">
+    <string>Custom1</string>
+   </property>
+  </action>
+  <action name="actionCustom2">
+   <property name="text">
+    <string>Custom2</string>
    </property>
   </action>
  </widget>

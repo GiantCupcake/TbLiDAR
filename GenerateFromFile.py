@@ -116,7 +116,7 @@ class LidarDataInterpreter:
     Interpret the data to create your own InterestPoints, then use yield
     to ensure the function is a Generator.
     """
-    def getCustomReader(self):
+    def getCustomReaderOne(self):
         dataCube = self.data['dataCubeAVG']
         size = dataCube.shape[0]
         def pointGenerator():
@@ -127,7 +127,19 @@ class LidarDataInterpreter:
                     point.sigma = 0
                     yield point
         return pointGenerator()
-
+    
+    
+    def getCustomReaderTwo(self):
+        dataCube = self.data['dataCubeAVG']
+        size = dataCube.shape[0]
+        def pointGenerator():
+            for iy in range(size):
+                for ix in range(size):
+                    point = InterestPoint((0,0,0))
+                    point.intensity = 0
+                    point.sigma = 0
+                    yield point
+        return pointGenerator()
 
 class InterestPoint:
     def __init__(self, pos, intensity = None, variation = None):

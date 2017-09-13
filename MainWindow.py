@@ -12,6 +12,7 @@ from PyQt5 import QtWidgets, QtCore
 
 import UI_MainWindow
 from centralWidget import CentralWidget
+from VTKFileDisplay import VTKFileDisplay
 
 
 class MainWindow(QtWidgets.QMainWindow, UI_MainWindow.Ui_MainWindow):
@@ -40,6 +41,23 @@ class MainWindow(QtWidgets.QMainWindow, UI_MainWindow.Ui_MainWindow):
         except:
             self.statusbar.showMessage("There was an error opening this folder", 3000)
 
+    def openVTKFile(self, s):
+        try:
+            fd = QtWidgets.QFileDialog()
+            fd.setFileMode(QtWidgets.QFileDialog.AnyFile)
+            if fd.exec():
+                print("After exec")
+                self.centralWidget = QtWidgets.QWidget()
+                hl = QtWidgets.QHBoxLayout()
+                hl.addWidget(VTKFileDisplay(fd.selectedFiles()[0]))
+                self.centralWidget.setLayout(hl)
+                print("After object construct")
+                self.setCentralWidget(self.centralWidget)
+                self.centralWidget.show()
+        except Exception as e:
+            self.statusbar.showMessage("There was an error opening this file", 3000)
+            print(e)
+        
         
     def readSettings(self):
         self.restoreGeometry(self.settings.value("geometry", type = QtCore.QByteArray))

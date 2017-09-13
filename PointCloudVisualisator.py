@@ -313,6 +313,13 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
         plyWriter.SetFileName(fileName)
         plyWriter.SetInputData(self.listPassThrough[-1].GetOutput())
         plyWriter.Write()
+        
+    def writeVTK(self, fileName):
+        vtkWriter = vtk.vtkPolyDataWriter()
+        vtkWriter.SetFileName(fileName)
+        vtkWriter.SetInputData(self.listPassThrough[-1].GetOutput())
+        vtkWriter.Write()
+
     
     @display_time
     def colorByIntensity(self):

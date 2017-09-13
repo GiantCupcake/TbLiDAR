@@ -23,6 +23,7 @@ import warnings
 
 
 from PointCloudVisualisator import PointCloudVisualisator
+from VTKFileDisplay import VTKFileDisplay
 
 
 def waiting_effects(func):
@@ -127,25 +128,33 @@ class CentralWidget(QWidget):
         
             
     @display_time
-    @waiting_effects           
+    @waiting_effects         
     def fullCubeMode(self, s):
-        #TODO: Rewrite properly
         interpreter = LidarDataInterpreter(self.currentFolder)
         self.pcv.updatePoints(interpreter.getFullCube())
         
         
     @display_time
     def depthMapMode(self, s):
-        #TODO: Rewrite properly
         interpreter = LidarDataInterpreter(self.currentFolder)
         self.pcv.updatePoints(interpreter.getPointsFromDepthMap())
+    
+    @display_time
+    def customModeOne(self, s):
+        interpreter = LidarDataInterpreter(self.currentFolder)
+        self.pcv.updatePoints(interpreter.getCustomReaderOne())
+        
+    @display_time    
+    def customModeTwo(self, s):
+        interpreter = LidarDataInterpreter(self.currentFolder)
+        self.pcv.updatePoints(interpreter.getCustomReaderOne())
         
         
     
     def writeSTL(self, s):
         fd = QFileDialog()
         fd.setAcceptMode(QFileDialog.AcceptSave)
-        fd.setNameFilter("STL format file (*.stl)");
+        fd.setNameFilter("STL format file (*.stl)")
         if fd.exec():
             fileNames = fd.selectedFiles()
             self.pcv.writeSTL(fileNames[0])
@@ -153,10 +162,22 @@ class CentralWidget(QWidget):
     def writePLY(self, s):
         fd = QFileDialog()
         fd.setAcceptMode(QFileDialog.AcceptSave)
-        fd.setNameFilter("PLY format file (*.ply)");
+        fd.setNameFilter("PLY format file (*.ply)")
         if fd.exec():
             fileNames = fd.selectedFiles()
             self.pcv.writePLY(fileNames[0])
+            
+            
+    def writeVTK(self, s):
+        fd = QFileDialog()
+        fd.setAcceptMode(QFileDialog.AcceptSave)
+        fd.setNameFilter("VTK format file (*.vtk)")
+        if fd.exec():
+            fileNames = fd.selectedFiles()
+            self.pcv.writeVTK(fileNames[0])
+
+            
+
         
     def customColoriser(self, s):
         warnings.warn("Not Implemented", Warning)
