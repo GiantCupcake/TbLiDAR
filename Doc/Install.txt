@@ -3,3 +3,6 @@ Destroy project folder
 Open gitBash and write :
 git clone -b deployment https://github.com/GiantCupcake/TbLiDAR.git
 move VTK-7.1.1 back in Lib
+
+When using launcher.bat, be sure to have a python 3.x installed under
+Lib/python36
