@@ -13,6 +13,7 @@ from PyQt5 import QtWidgets, QtCore
 import UI_MainWindow
 from centralWidget import CentralWidget
 from VTKFileDisplay import VTKFileDisplay
+from WidgetVTKFileDisplay import WidgetVTKFileDisplay
 
 
 class MainWindow(QtWidgets.QMainWindow, UI_MainWindow.Ui_MainWindow):
@@ -47,12 +48,10 @@ class MainWindow(QtWidgets.QMainWindow, UI_MainWindow.Ui_MainWindow):
             fd.setFileMode(QtWidgets.QFileDialog.AnyFile)
             if fd.exec():
                 print("After exec")
-                self.centralWidget = QtWidgets.QWidget()
-                hl = QtWidgets.QHBoxLayout()
-                hl.addWidget(VTKFileDisplay(fd.selectedFiles()[0]))
-                self.centralWidget.setLayout(hl)
+                self.centralWidget = WidgetVTKFileDisplay(self, fd.selectedFiles()[0])
                 print("After object construct")
                 self.setCentralWidget(self.centralWidget)
+                self.setupSlots(self.centralWidget)
                 self.centralWidget.show()
         except Exception as e:
             self.statusbar.showMessage("There was an error opening this file", 3000)

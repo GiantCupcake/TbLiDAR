@@ -41,7 +41,6 @@ class Ui_MainWindow(object):
         
         self.actionTable_From_Filtered_Points.triggered.connect(mainWidget.buildCMFromFilteredPoints)
         self.actionTable_From_All_Points.triggered.connect(mainWidget.buildCMFromAllPoints)
-
         
     
     def setupUi(self, MainWindow):

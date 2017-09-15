@@ -1,0 +1,5 @@
+Move VTK-7.1.1 out of the ptoject folder
+Destroy project folder
+Open gitBash and write :
+git clone -b deployment https://github.com/GiantCupcake/TbLiDAR.git
+move VTK-7.1.1 back in Lib

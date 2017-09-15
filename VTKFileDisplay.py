@@ -14,8 +14,11 @@ class VTKFileDisplay(PointCloudVisualisator):
     
     def __init__(self, fileName):
         QVTKRenderWindowInteractor.__init__(self)
+        
         self.pointsData = vtk.vtkPolyData()
+        self.updatePoints(fileName)
         self.colorMapPoints =  self.pointsData
+        
         self.ren = vtk.vtkRenderer()
         self.GetRenderWindow().AddRenderer(self.ren)
         self.iren = self.GetRenderWindow().GetInteractor()
@@ -24,7 +27,6 @@ class VTKFileDisplay(PointCloudVisualisator):
         self.bannedIds = vtk.vtkIdTypeArray()
         self.bannedIds.SetNumberOfComponents(1)
         
-        self.updatePoints(fileName)
         self.initPipeline()
         self.initOutline()
         self.showOutliningCube()
@@ -39,9 +41,7 @@ class VTKFileDisplay(PointCloudVisualisator):
         vtkReader = vtk.vtkPolyDataReader()
         vtkReader.SetFileName(fileName)
         vtkReader.Update()
-        print(fileName)
         self.pointsData = vtkReader.GetOutput()
-        print(self.pointsData)
         
     def initPipeline(self):
         self.firstAssignAttribute = vtk.vtkAssignAttribute()

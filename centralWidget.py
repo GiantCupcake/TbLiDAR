@@ -21,9 +21,7 @@ from matplotlib import cm, colors
 
 import warnings
 
-
 from PointCloudVisualisator import PointCloudVisualisator
-from VTKFileDisplay import VTKFileDisplay
 
 
 def waiting_effects(func):
@@ -88,7 +86,7 @@ class CentralWidget(QWidget):
         self.controlsWidget.outlierFilter.widget.optionsChanged.connect(self.pcv.setOutlierOptions)
         self.controlsWidget.meshOptions.widget.alphaChanged.connect(self.pcv.setMeshAlpha)
         self.controlsWidget.meshOptions.widget.smoothOptionsChanged.connect(self.pcv.setSmoothingOptions)
-
+        
     
     def activateOutliningFilter(self, s):
         if s == Qt.Unchecked:

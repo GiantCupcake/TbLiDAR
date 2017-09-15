@@ -22,7 +22,6 @@ import numpy as np
 
 
 from InteractorStylePickPoints import InteractorStylePickPoints
-from GenerateFromFile import display_time
  
 class PointCloudVisualisator(QVTKRenderWindowInteractor):
         
@@ -321,7 +320,6 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
         vtkWriter.Write()
 
     
-    @display_time
     def colorByIntensity(self):
         self.scalarBar.SetTitle("Intensity [%]")
         self.lastAssignAttribute.Assign("Intensity", "SCALARS", "POINT_DATA")
@@ -329,7 +327,6 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
         self.mapper.SetScalarRange(self.colorMapPoints.GetPointData().GetAbstractArray('Intensity').GetRange())
 
     
-    @display_time
     def colorBySigma(self):
         self.scalarBar.SetTitle("Sigma [%]")
         self.lastAssignAttribute.Assign("Sigma", "SCALARS", "POINT_DATA")
@@ -337,7 +334,6 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
         self.mapper.SetScalarRange(self.colorMapPoints.GetPointData().GetAbstractArray('Sigma').GetRange())
 
 
-    @display_time
     def colorByDepth(self):
         self.scalarBar.SetTitle("Depth [m]")
         self.lastAssignAttribute.Assign("Depth", "SCALARS", "POINT_DATA")
@@ -444,12 +440,10 @@ class PointCloudVisualisator(QVTKRenderWindowInteractor):
         self.selectionNode.SetSelectionList(self.bannedIds)
         self.selectionNode.Modified()
         
-    @display_time
     def mapColorsFromFilteredPoints(self):
         self.colorMapPoints = self.lastAssignAttribute.GetOutput()
         self.mapper.SetScalarRange(self.colorMapPoints.GetScalarRange())
     
-    @display_time
     def mapColorsFromAllPoints(self):
         self.colorMapPoints = self.firstAssignAttribute.GetOutput()
         self.mapper.SetScalarRange(self.colorMapPoints.GetScalarRange())
